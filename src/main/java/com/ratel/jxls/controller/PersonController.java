@@ -3,14 +3,22 @@ package com.ratel.jxls.controller;
 import com.ratel.jxls.entity.Person;
 import com.ratel.jxls.utils.JxlsUtils;
 import com.ratel.jxls.view.JxlsExcelView;
+import net.sf.jxls.transformer.XLSTransformer;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.jxls.common.Context;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -24,6 +32,15 @@ import java.util.*;
 @RestController
 @RequestMapping("/person")
 public class PersonController {
+
+
+    private Resource salaryExportResource;
+    private HttpServletResponse response;
+
+    @PostConstruct
+    public void setup() {
+        salaryExportResource = new ClassPathResource("/templates/3.xlsx");
+    }
 
     /**
      * 使用springmvc的view 进行导出简化操作
@@ -41,7 +58,7 @@ public class PersonController {
         people.add(ls);
         people.add(ww);
         map.put("person", people);
-        return new ModelAndView(new JxlsExcelView("templates/1.xlsx", "2"), map);
+        return new ModelAndView(new JxlsExcelView("templates/3.xlsx", "学生"), map);
     }
 
     /**
@@ -71,7 +88,7 @@ public class PersonController {
             response.setHeader("content-disposition", "attachment;filename=" + 3 + ".xls");
             response.setContentType("application/vnd.ms-excel");
             //注意这个地方是从磁盘路径取得模板
-            JxlsUtils.exportExcel("F:/templates/竖列.xlsx", os, model);
+            JxlsUtils.exportExcel("/templates/1.xlsx", os, model);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,10 +130,36 @@ public class PersonController {
             response.setHeader("content-disposition", "attachment;filename=" + 3 + ".xls");
             response.setContentType("application/vnd.ms-excel");
             //注意这个地方是从磁盘路径取得模板
-            JxlsUtils.exportExcel("F:/templates/竖列.xlsx", os, model);
+            JxlsUtils.exportExcel("src/main/resources/templates/1.xlsx", os, model);
             os.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @GetMapping("/export/jxl4")
+    public void jxls5(HttpServletResponse response) throws IOException, InvalidFormatException {
+        this.response = response;
+        Map<String, Object> map = new HashMap<String, Object>();
+        ArrayList<Person> people = new ArrayList<>();
+        Person zs = new Person("1001", "zs", 12);
+        Person ls = new Person("1002", "ls", 13);
+        Person ww = new Person("1003", "ww", 14);
+        people.add(zs);
+        people.add(ls);
+        people.add(ww);
+        map.put("person", people);
+        //将数据渲染到excel模板上
+        Workbook workbook = new XLSTransformer().transformXLS(salaryExportResource.getInputStream(), map);
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        workbook.write(output);
+        String filename = "员工薪资单.xlsx";
+        response.setContentType(String.format("%s;charset=utf-8", "application/x"));
+        response.setHeader("Content-Disposition", "attachment;filename=" +
+                new String(filename.getBytes("utf-8"), "iso8859-1"));
+        response.setHeader("Content-Length", String.valueOf(output.toByteArray().length));
+        // Streams.write(output.toByteArray(), response.getOutputStream());
+        response.getOutputStream().write(output.toByteArray());
+      /*  return new ModelAndView(new JxlsExcelView("templates/3.xlsx", "学生"), map);*/
     }
 }

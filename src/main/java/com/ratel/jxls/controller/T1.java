@@ -31,7 +31,7 @@ public class T1 {
         Context context = new Context();
         context.putVar("headers", Arrays.asList("姓名" , "性别" , "年龄"));
         context.putVar("dataList", dataList);
-        OutputStream os = new FileOutputStream(new File("F:\\templates\\result4.xlsx"));
+        OutputStream os = new FileOutputStream(new File("D:\\APP\\IDEAWorkSpace\\springboot-jxls-master\\result4.xlsx"));
         //指定Sheet文件解析
         JxlsHelper.getInstance().processTemplate(is, os, context);
         os.flush();
