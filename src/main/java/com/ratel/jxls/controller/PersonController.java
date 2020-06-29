@@ -142,12 +142,12 @@ public class PersonController {
         this.response = response;
         Map<String, Object> map = new HashMap<String, Object>();
         ArrayList<Person> people = new ArrayList<>();
-        Person zs = new Person("1001", "zs", 12);
+        /*Person zs = new Person("1001", "zs", 12);
         Person ls = new Person("1002", "ls", 13);
         Person ww = new Person("1003", "ww", 14);
         people.add(zs);
         people.add(ls);
-        people.add(ww);
+        people.add(ww);*/
         map.put("person", people);
         //将数据渲染到excel模板上
         Workbook workbook = new XLSTransformer().transformXLS(salaryExportResource.getInputStream(), map);
